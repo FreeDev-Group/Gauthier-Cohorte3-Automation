@@ -1,0 +1,20 @@
+{
+  "name": "dieu-merci",
+  "version": "1.0.0",
+  "description": "This repository contains the automated end-to-end (E2E) testing suite for the **Student Survey Application**, built using Cypress.",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "cypress run",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^15.17.0"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "cypresspractice",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:chrome": "cypress run --browser chrome",
+    "cy:edge": "cypress run --browser edge",
+
+    "report:merge": "mochawesome-merge cypress/reports/*.json > cypress/reports/report.json",
+    "report:generate": "mochawesome-report-generator cypress/reports/report.json -f report -o cypress/reports/html",
+    "report:full": "npm run cy:run && npm run report:merge && npm run report:generate"
+  },
+  "devDependencies": {
+    "cypress": "^15.17.0",
+    "cypress-mochawesome-reporter": "^4.0.2",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^5.1.1",
+    "mochawesome-report-generator": "^6.3.2"
+  }
+}
