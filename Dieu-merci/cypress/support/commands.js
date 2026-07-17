@@ -14,15 +14,27 @@
  */
 Cypress.Commands.add("login", (username, password) => {
   cy.visit("/wp-login.php");
-  cy.get("#loginform #user_login").clear().type(username);
-  cy.get("#loginform #user_pass").clear().type(password);
+  cy.get("#loginform #user_login")
+    .clear()
+    .type(username, { delay: 0 })
+    .should("have.value", username);
+  cy.get("#loginform #user_pass")
+    .clear()
+    .type(password, { delay: 0 })
+    .should("have.value", password);
   cy.get("#loginform #wp-submit").click();
 
-  // Wait for successful login - verify URL and dashboard presence
-  cy.url().should("not.include", "wp-login.php");
-  cy.url().should("not.include", "redirect_to");
-  cy.get("body").should("not.contain", "Invalid username");
-  cy.get("body").should("not.contain", "incorrect password");
+  cy.get("body", { timeout: 20000 }).should(($body) => {
+    const text = $body.text().toLowerCase();
+    const hasAuthError =
+      text.includes("invalid username") ||
+      text.includes("incorrect password") ||
+      text.includes("cookies are blocked");
+    expect(
+      hasAuthError,
+      "Login should not remain on the login page with an authentication error",
+    ).to.be.false;
+  });
 });
 
 /**

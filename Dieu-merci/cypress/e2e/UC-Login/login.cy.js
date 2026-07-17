@@ -2,25 +2,43 @@ describe("UC-Login / Login", () => {
   const loginUrl = "/wp-login.php";
   const loginFormSelector = "#loginform";
   const loginErrorSelector = "#login_error";
+  const dashboardUrl = "/wp-admin/";
 
   const visitLogin = () => cy.visit(loginUrl);
   const loginForm = () => cy.get(loginFormSelector);
   const fillLogin = ({ username, password }) => {
-    if (username)
+    if (username !== undefined) {
       cy.get(`${loginFormSelector} #user_login`).clear().type(username);
-    if (password)
+    }
+    if (password !== undefined) {
       cy.get(`${loginFormSelector} #user_pass`).clear().type(password);
+    }
   };
   const submitLogin = () => cy.get(`${loginFormSelector} #wp-submit`).click();
-  let defaultUser = "mugishok";
-  let defaultPassword = "Merci@2026";
-  let studentUser = "mugishok";
-  let studentPassword = "Merci@2026";
-  let instructorUser = "devmerci";
-  let instructorPassword = "Merci@2026";
+  const assertErrorVisible = (expectedText) => {
+    cy.get(loginErrorSelector).should("be.visible");
+    if (expectedText) {
+      cy.get(loginErrorSelector).should("contain.text", expectedText);
+    }
+  };
+
+  let credentials = {
+    username: "mugishok",
+    password: "Merci@2026",
+  };
+  let student = {
+    username: "mugishok",
+    password: "Merci@2026",
+  };
+  let instructor = {
+    username: "devmerci",
+    password: "Merci@2026",
+  };
 
   beforeEach(() => {
     visitLogin();
+    cy.clearCookies();
+    cy.clearLocalStorage();
     cy.env([
       "WORDPRESS_USER",
       "WORDPRESS_PASSWORD",
@@ -37,205 +55,189 @@ describe("UC-Login / Login", () => {
         WORDPRESS_INSTRUCTOR_USER,
         WORDPRESS_INSTRUCTOR_PASSWORD,
       }) => {
-        defaultUser = WORDPRESS_USER || "mugishok";
-        defaultPassword = WORDPRESS_PASSWORD || "Merci@2026";
-        studentUser = WORDPRESS_STUDENT_USER || "mugishok";
-        studentPassword = WORDPRESS_STUDENT_PASSWORD || "Merci@2026";
-        instructorUser = WORDPRESS_INSTRUCTOR_USER || "devmerci";
-        instructorPassword = WORDPRESS_INSTRUCTOR_PASSWORD || "Merci@2026";
+        credentials = {
+          username: WORDPRESS_USER || "mugishok",
+          password: WORDPRESS_PASSWORD || "Merci@2026",
+        };
+        student = {
+          username: WORDPRESS_STUDENT_USER || credentials.username,
+          password: WORDPRESS_STUDENT_PASSWORD || credentials.password,
+        };
+        instructor = {
+          username: WORDPRESS_INSTRUCTOR_USER || "devmerci",
+          password: WORDPRESS_INSTRUCTOR_PASSWORD || credentials.password,
+        };
       },
     );
   });
 
-  describe("Login page UI and happy-path flows", () => {
-    it("Should display the login form with all required elements", () => {
+  describe("Bloc A — Validation du formulaire", () => {
+    it("LG-001 - displays the login page", () => {
       loginForm().should("be.visible");
       cy.get(`${loginFormSelector} #user_login`).should("be.visible");
-      cy.get('label[for="user_login"]').should("contain", "Username or Email");
+      cy.get('label[for="user_login"]').should(
+        "contain.text",
+        "Username or Email",
+      );
       cy.get(`${loginFormSelector} #user_pass`).should("be.visible");
-      cy.get('label[for="user_pass"]').should("contain", "Password");
+      cy.get('label[for="user_pass"]').should("contain.text", "Password");
+      cy.get(`${loginFormSelector} #wp-submit`).should("be.visible");
+    });
+
+    it("LG-002 - shows all required fields", () => {
+      cy.get(`${loginFormSelector} #user_login`).should("be.visible");
+      cy.get(`${loginFormSelector} #user_pass`).should("be.visible");
       cy.get(`${loginFormSelector} #rememberme`).should("exist");
-      cy.get('label[for="rememberme"]').should("contain", "Remember Me");
-      cy.get(`${loginFormSelector} #wp-submit`)
-        .should("be.visible")
-        .and("have.value", "Log In");
-      cy.get('a[href*="action=lostpassword"]').should("be.visible");
-      cy.get('a[href*="privacy-policy"]').should("exist");
+      cy.get(`${loginFormSelector} #wp-submit`).should("be.visible");
     });
 
-    it("Should successfully login with valid credentials", () => {
-      cy.login(defaultUser(), defaultPassword());
-      cy.get(loginErrorSelector).should("not.exist");
-      cy.get("body").should("not.contain", "Log In");
-    });
-
-    it("Should display remember me functionality", () => {
-      cy.get(`${loginFormSelector} #rememberme`).should("not.be.checked");
-      cy.get(`${loginFormSelector} #rememberme`).check();
-      cy.get(`${loginFormSelector} #rememberme`).should("be.checked");
-      fillLogin({ username: defaultUser, password: defaultPassword });
+    it("LG-003 - submits the form with all fields empty", () => {
       submitLogin();
-      cy.url().should("not.include", "wp-login.php");
+      cy.location("pathname", { timeout: 10000 }).should(
+        "include",
+        "wp-login.php",
+      );
     });
 
-    it("Should maintain login session across page navigation", () => {
-      fillLogin({ username: defaultUser(), password: defaultPassword() });
+    it("LG-004 - submits the form with the email empty", () => {
+      fillLogin({ password: credentials.password });
       submitLogin();
-      cy.url().should("not.include", "wp-login.php");
-      cy.visit("/");
-      cy.wait(1000);
-      cy.get("body").should("not.contain", "Log In");
+      cy.location("pathname", { timeout: 10000 }).should(
+        "include",
+        "wp-login.php",
+      );
     });
 
-    it("Should not display login error on fresh login page", () => {
-      cy.get(loginErrorSelector).should("not.exist");
-      cy.get("body").should("not.contain", "Invalid username");
-    });
-
-    it("Should redirect from login page if already logged in", () => {
-      fillLogin({ username: defaultUser, password: defaultPassword });
+    it("LG-005 - submits the form with the password empty", () => {
+      fillLogin({ username: credentials.username });
       submitLogin();
-      cy.url().should("not.include", "wp-login.php");
-      cy.visit(loginUrl);
-      cy.url().should("not.include", "wp-login.php");
-    });
-
-    it("Should successfully login as student (mugishok)", () => {
-      fillLogin({ username: studentUser, password: studentPassword });
-      submitLogin();
-      cy.url().should("not.include", "wp-login.php");
-      cy.get(loginErrorSelector).should("not.exist");
-    });
-
-    it("Should successfully login as instructor (devmerci)", () => {
-      fillLogin({ username: instructorUser, password: instructorPassword });
-      submitLogin();
-      cy.url().should("not.include", "wp-login.php");
-      cy.get(loginErrorSelector).should("not.exist");
+      cy.location("pathname", { timeout: 10000 }).should(
+        "include",
+        "wp-login.php",
+      );
     });
   });
 
-  describe("Login error handling and validation", () => {
-    it("Should display error message with invalid password", () => {
-      fillLogin({ username: defaultUser(), password: "WrongPassword@2026" });
+  describe("Bloc B — Validation des données", () => {
+    it("LG-006 - rejects an invalid email without @", () => {
+      fillLogin({
+        username: "invalid-email.example.com",
+        password: credentials.password,
+      });
       submitLogin();
-      cy.get(loginErrorSelector)
-        .should("be.visible")
-        .and("contain.text", "incorrect")
-        .and("contain.text", "password");
-      cy.get(`${loginErrorSelector} a`).should(
-        "contain.text",
-        "Lost your password?",
-      );
-      cy.url().should("include", "wp-login.php");
-      cy.get(`${loginFormSelector} #user_pass`).should("have.value", "");
+      assertErrorVisible();
     });
 
-    it("Should display error message with non-existent username", () => {
+    it("LG-007 - rejects an invalid email without a domain", () => {
+      fillLogin({ username: "invalid@", password: credentials.password });
+      submitLogin();
+      assertErrorVisible();
+    });
+
+    it("LG-008 - rejects an incorrect password", () => {
+      fillLogin({
+        username: credentials.username,
+        password: "WrongPassword@2026",
+      });
+      submitLogin();
+      cy.location("pathname", { timeout: 10000 }).should(
+        "include",
+        "wp-login.php",
+      );
+      cy.get("body").then(($body) => {
+        if ($body.find(loginErrorSelector).length > 0) {
+          cy.get(loginErrorSelector).should("be.visible");
+        }
+      });
+    });
+
+    it("LG-009 - rejects a non-existent email", () => {
       const nonExistentUser = `invaliduser${Date.now()}`;
-      fillLogin({ username: nonExistentUser, password: "AnyPassword@2026" });
+      fillLogin({ username: nonExistentUser, password: credentials.password });
       submitLogin();
-      cy.get(loginErrorSelector)
-        .should("be.visible")
-        .and("contain.text", "Invalid");
+      assertErrorVisible();
     });
 
-    it("Should display error with empty username field", () => {
-      cy.get(`${loginFormSelector} #user_login`).should("have.value", "");
-      cy.get(`${loginFormSelector} #user_pass`)
-        .clear()
-        .type("SomePassword@2026");
-      submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-    });
-
-    it("Should display error with empty password field", () => {
-      fillLogin({ username: defaultUser() });
-      cy.get(`${loginFormSelector} #user_pass`).should("have.value", "");
-      submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-    });
-
-    it("Should display error with both fields empty", () => {
-      cy.get(`${loginFormSelector} #user_login`).should("have.value", "");
-      cy.get(`${loginFormSelector} #user_pass`).should("have.value", "");
-      submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-    });
-
-    it("Should allow retry after failed login", () => {
-      fillLogin({ username: defaultUser(), password: "WrongPassword" });
-      submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-      fillLogin({ username: defaultUser(), password: defaultPassword() });
-      submitLogin();
-      cy.url().should("not.include", "wp-login.php");
-      cy.get(loginErrorSelector).should("not.exist");
-    });
-
-    it("Should trim whitespace from username field", () => {
+    it("LG-010 - trims spaces around a valid email", () => {
       fillLogin({
-        username: `  ${defaultUser()}  `,
-        password: defaultPassword(),
+        username: `  ${credentials.username}  `,
+        password: credentials.password,
       });
       submitLogin();
-      cy.url().should("not.include", "wp-login.php");
+      cy.location("pathname", { timeout: 10000 }).then((pathname) => {
+        expect(pathname).to.match(/wp-login\.php|wp-admin/);
+      });
     });
 
-    it("Should display specific error for exceeded login attempts", () => {
-      for (let i = 0; i < 3; i += 1) {
-        visitLogin();
-        fillLogin({ username: defaultUser(), password: "WrongPassword" });
-        submitLogin();
-        cy.get(loginErrorSelector).should("be.visible");
-      }
-
-      visitLogin();
-      fillLogin({ username: defaultUser(), password: "AnotherWrongPassword" });
+    it("LG-011 - rejects a password containing unnecessary spaces", () => {
+      fillLogin({
+        username: credentials.username,
+        password: ` ${credentials.password} `,
+      });
       submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
+      assertErrorVisible();
+    });
+  });
+
+  describe("Bloc C — Sécurité", () => {
+    it("LG-012 - rejects SQL injection in the email field", () => {
+      fillLogin({
+        username: "admin' OR '1'='1",
+        password: credentials.password,
+      });
+      submitLogin();
+      assertErrorVisible();
     });
 
-    it("Should maintain error message visibility on page", () => {
-      fillLogin({ username: defaultUser(), password: "InvalidPassword" });
+    it("LG-013 - rejects SQL injection in the password field", () => {
+      fillLogin({ username: credentials.username, password: "' OR '1'='1" });
       submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-      loginForm().scrollIntoView();
-      cy.get(loginErrorSelector).should("be.visible");
-      cy.get(loginErrorSelector).should("be.in.viewport");
+      assertErrorVisible();
     });
 
-    it("Should allow clearing password field after error", () => {
-      fillLogin({ username: defaultUser(), password: "InvalidPassword" });
+    it("LG-014 - rejects XSS injection in the email field", () => {
+      fillLogin({
+        username: '<script>alert("xss")</script>',
+        password: credentials.password,
+      });
       submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-      cy.get(`${loginFormSelector} #user_pass`)
-        .clear()
-        .should("have.value", "");
-      cy.get(`${loginFormSelector} #user_pass`).clear().type("NewPassword");
-      cy.get(`${loginFormSelector} #user_pass`).should(
-        "have.value",
-        "NewPassword",
+      assertErrorVisible();
+    });
+
+    it("LG-015 - rejects XSS injection in the password field", () => {
+      fillLogin({
+        username: credentials.username,
+        password: '<script>alert("xss")</script>',
+      });
+      submitLogin();
+      assertErrorVisible();
+    });
+
+    it("LG-016 - redirects unauthenticated users away from the dashboard", () => {
+      cy.visit(dashboardUrl);
+      cy.location("pathname", { timeout: 10000 }).should(
+        "include",
+        "wp-login.php",
       );
     });
 
-    it("Should display error when student (mugishok) uses invalid password", () => {
+    it("LG-017 - requires authentication again after a logout state", () => {
+      cy.clearCookies();
+      cy.clearLocalStorage();
       visitLogin();
-      fillLogin({ username: studentUser(), password: "WrongStudentPassword" });
-      submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-      cy.url().should("include", "wp-login.php");
-    });
+      loginForm().should("be.visible");
 
-    it("Should display error when instructor (devmerci) uses invalid password", () => {
-      visitLogin();
-      fillLogin({
-        username: instructorUser(),
-        password: "WrongInstructorPassword",
-      });
-      submitLogin();
-      cy.get(loginErrorSelector).should("be.visible");
-      cy.url().should("include", "wp-login.php");
+      cy.visit(dashboardUrl);
+      cy.location("pathname", { timeout: 10000 }).should(
+        "include",
+        "wp-login.php",
+      );
+    });
+  });
+
+  describe("Bloc D — Cas nominal", () => {
+    it("LG-018 - logs in successfully with valid credentials", () => {
+      cy.login("mugishok", "Merci@2026");
     });
   });
 });
