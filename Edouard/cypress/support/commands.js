@@ -57,3 +57,103 @@ Cypress.Commands.add('loginAsStudent', () => {
     .should('not.include', 'wp-login.php')
 
 })
+
+Cypress.Commands.add('openSurveyByName', (surveyName) => {
+
+  cy.contains('All Surveys')
+    .should('be.visible')
+    .click()
+
+  function searchSurvey() {
+
+    cy.get('body').then(($body) => {
+
+      if ($body.text().includes(surveyName)) {
+
+        cy.contains('a', surveyName)
+          .scrollIntoView()
+          .should('be.visible')
+          .click()
+
+      } else {
+
+        cy.contains('Next Page')
+          .scrollIntoView()
+          .should('be.visible')
+          .click()
+
+        cy.url().should('include', '/survey')
+
+        cy.wait(1000)
+
+        searchSurvey()
+
+      }
+
+    })
+
+  }
+
+  searchSurvey()
+
+})
+
+// ======================================================
+// LOGIN AS INSTRUCTOR
+// ======================================================
+
+Cypress.Commands.add("loginAsInstructor", () => {
+
+    cy.visit("https://student.michaelkentburns.com/wp-login.php");
+
+    cy.get("#user_login")
+        .should("be.visible")
+        .clear()
+        .type("EdouardK");
+
+    cy.get("#user_pass")
+        .should("be.visible")
+        .clear()
+        .type("Kiza2001@");
+
+    cy.get("#wp-submit")
+        .should("be.enabled")
+        .click();
+
+    cy.url({ timeout: 15000 })
+        .should("include", "/wp-admin/");
+
+    cy.contains("Dashboard").should("be.visible");
+
+});
+
+
+// ======================================================
+// OPEN SURVEYS PAGE
+// ======================================================
+
+Cypress.Commands.add("openSurveyPage", () => {
+
+    cy.contains("Surveys")
+        .should("be.visible")
+        .click();
+
+    cy.url().should("include", "survey");
+
+});
+
+
+// ======================================================
+// OPEN CREATE SURVEY PAGE
+// ======================================================
+
+Cypress.Commands.add("openCreateSurvey", () => {
+
+    cy.contains("Add New Survey")
+        .should("be.visible")
+        .click();
+
+    cy.contains("Add New Survey")
+        .should("be.visible");
+
+});

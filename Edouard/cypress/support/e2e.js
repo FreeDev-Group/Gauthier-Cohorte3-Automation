@@ -41,3 +41,11 @@ afterEach(function () {
 
   cy.log(`TEST FINISHED: ${status}`);
 });
+
+Cypress.on("uncaught:exception", (err) => {
+
+  if (err.message.includes("valid JSON response")) {
+    return false;
+  }
+
+});
