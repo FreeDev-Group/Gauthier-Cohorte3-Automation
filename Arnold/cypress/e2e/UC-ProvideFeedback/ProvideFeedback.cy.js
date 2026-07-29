@@ -34,7 +34,7 @@ describe("Provide Feedback", () => {
     cy.contains("All Surveys").click();
 
     // Navigate through three pages.
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       // Scroll to pagination section.
       cy.scrollTo("bottom");
 

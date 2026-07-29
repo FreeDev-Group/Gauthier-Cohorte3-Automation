@@ -26,6 +26,15 @@ describe("Review Past Feedback", () => {
 
     // Open My Completed Surveys
     cy.contains("Completed Surveys").should("be.visible");
+
+   // Open Arnold Project Testing Survey
+   cy.contains("Arnold Project Testing Survey", { timeout: 10000}) .click();
+
+      cy.scrollTo("bottom");
+
+
   });
+
+   
 
 });
