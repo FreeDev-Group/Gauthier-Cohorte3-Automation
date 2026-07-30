@@ -101,6 +101,63 @@ Cypress.Commands.add("requestPasswordReset", (identifier) => {
 // ============================================================================
 
 /**
+ * Helper to fill the WordPress classic editor content.
+ * Supports TinyMCE visual editor, visible textarea editor, and hidden textarea fallback.
+ * @param {string} content - Survey/content text to set
+ */
+Cypress.Commands.add("fillWpEditor", (content) => {
+  const attemptTinyMCE = () =>
+    cy.window().then((win) => {
+      const editor =
+        (win.tinyMCE && win.tinyMCE.activeEditor) ||
+        (win.tinymce && win.tinymce.activeEditor);
+
+      if (editor && typeof editor.setContent === "function") {
+        editor.setContent(content);
+        if (typeof win.tinyMCE?.triggerSave === "function") {
+          win.tinyMCE.triggerSave();
+        }
+        if (typeof win.tinymce?.triggerSave === "function") {
+          win.tinymce.triggerSave();
+        }
+        return true;
+      }
+
+      return false;
+    });
+
+  const attemptTextarea = () =>
+    cy
+      .get(
+        "textarea#content, textarea.wp-editor-area, textarea#survey_description",
+        {
+          timeout: 20000,
+        },
+      )
+      .then(($textarea) => {
+        const $visibleTextarea = $textarea.filter(":visible");
+
+        if ($visibleTextarea.length) {
+          cy.wrap($visibleTextarea.first())
+            .clear({ force: true })
+            .type(content, { delay: 0 });
+          return;
+        }
+
+        cy.wrap($textarea.first())
+          .invoke("val", content)
+          .trigger("input")
+          .trigger("change");
+      });
+
+  attemptTinyMCE().then((usedTinyMCE) => {
+    if (!usedTinyMCE) {
+      attemptTextarea();
+    }
+  });
+});
+
+/**
  * Create a new survey via WordPress dashboard
  * @param {object} surveyData - Survey data object
  * @param {string} surveyData.title - Survey title
@@ -114,11 +171,23 @@ Cypress.Commands.add("createSurvey", (surveyData) => {
 
   // Fill survey description if available
   if (surveyData.description) {
-    cy.get("#content").clear().type(surveyData.description);
+    cy.fillWpEditor(surveyData.description);
   }
 
   // Publish survey
-  cy.get("#publish").click();
+  cy.get("body").then(($body) => {
+    const candidates = Cypress.$(
+      "#publish, #save-post, button[type='submit'], input[type='submit']",
+      $body,
+    ).filter(":visible");
+    const target = candidates.filter((_, el) => {
+      const text = Cypress.$(el).text().trim().toLowerCase();
+      const value = (el.value || "").trim().toLowerCase();
+      return text.includes("publish") || value.includes("publish");
+    });
+    const action = target.length ? target.first() : candidates.first();
+    cy.wrap(action).click({ force: true });
+  });
 
   // Verify success
   cy.get(".notice-success").should("be.visible");
@@ -137,7 +206,7 @@ Cypress.Commands.add("editSurvey", (surveyData) => {
   }
 
   if (surveyData.description) {
-    cy.get("#content").clear().type(surveyData.description);
+    cy.fillWpEditor(surveyData.description);
   }
 
   cy.get("#publish").click();

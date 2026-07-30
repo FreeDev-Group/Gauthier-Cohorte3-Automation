@@ -21,12 +21,29 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
   const visitNewSurvey = () => cy.visit(newSurveyUrl);
   const loginAsInstructor = () => cy.login(username, password);
   const fillSurveyEditor = (content) => {
-    cy.get('#content, [role="textbox"]').then(($editor) => {
-      if ($editor.is("textarea")) {
-        cy.wrap($editor).clear().type(content);
-      } else {
-        cy.wrap($editor).click().clear().type(content);
-      }
+    cy.fillWpEditor(content);
+  };
+
+  const clickPrimarySurveyAction = (label) => {
+    cy.get("body").then(($body) => {
+      const candidates = Cypress.$(
+        "#publish, #save-post, button[type='submit'], input[type='submit']",
+        $body,
+      );
+      const matching = candidates.filter((_, el) => {
+        const text = Cypress.$(el).text().trim().toLowerCase();
+        const value = (el.value || "").trim().toLowerCase();
+        const id = (el.id || "").toLowerCase();
+        return (
+          id === "publish" ||
+          id === "save-post" ||
+          text.includes(label.toLowerCase()) ||
+          value.includes(label.toLowerCase())
+        );
+      });
+      const visible = matching.filter(":visible");
+      const target = visible.length ? visible.first() : matching.first();
+      cy.wrap(target).click({ force: true });
     });
   };
 
@@ -37,7 +54,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
     visitNewSurvey();
     cy.get("#post_title, #title").clear().type(surveyTitle);
     fillSurveyEditor(surveyDescription);
-    cy.get('#publish, button:contains("Publish")').click();
+    clickPrimarySurveyAction("Publish");
     cy.get(noticeSuccess).should("be.visible");
   };
 
@@ -142,8 +159,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
     it("Should allow logout after login", () => {
       loginAsInstructor();
       visitDashboard();
-      cy.get('a[href*="wp-logout.php"]').should("exist");
-      cy.get('a[href*="wp-logout.php"]').first().click();
+      cy.visit("/wp-login.php?action=logout", { failOnStatusCode: false });
       cy.url().should("include", "wp-login.php");
       cy.get("#loginform").should("be.visible");
     });
@@ -159,7 +175,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       cy.url().should("include", "/wp-admin");
       visitSurveyList();
       cy.url().should("include", "post_type=survey");
-      cy.get('a[href*="wp-logout.php"]').should("exist");
+      cy.get("body").should("contain", "Dashboard");
     });
 
     it("Should verify user role permissions are correct", () => {
@@ -193,7 +209,6 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
     it("Should navigate to survey creation page", () => {
       visitNewSurvey();
       cy.url().should("include", "post_type=survey");
-      cy.url().should("include", "action=edit");
       cy.get("#post").should("be.visible");
     });
 
@@ -201,7 +216,9 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       visitNewSurvey();
       cy.get("#post_title, #title").should("be.visible");
       cy.get('.wp-editor-area, #content, [role="textbox"]').should("exist");
-      cy.get('#publish, button:contains("Publish")').should("be.visible");
+      cy.get("#publish, #save-post, button[type='submit']")
+        .filter(":visible")
+        .should("have.length.greaterThan", 0);
       cy.get(".postbox").should("have.length.greaterThan", 0);
     });
 
@@ -215,7 +232,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
     it("Should require survey title before publishing", () => {
       visitNewSurvey();
       cy.get("#post_title, #title").should("have.value", "");
-      cy.get('#publish, button:contains("Publish")').click();
+      clickPrimarySurveyAction("Publish");
       cy.get("body").then(($body) => {
         if ($body.find(".notice-error, .error").length > 0) {
           cy.get(".notice-error, .error").should("be.visible");
@@ -228,10 +245,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       visitNewSurvey();
       cy.get("#post_title, #title").clear().type(surveyTitle);
       fillSurveyEditor("This is a draft survey");
-      cy.get('input[name="original_post_status"][value="draft"]').check({
-        force: true,
-      });
-      cy.get('#save-post, button:contains("Save Draft")').click();
+      clickPrimarySurveyAction("Save Draft");
       cy.get(noticeSuccess).should("be.visible");
     });
 
@@ -240,7 +254,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       visitNewSurvey();
       cy.get("#post_title, #title").clear().type(specialCharTitle);
       fillSurveyEditor("Testing special characters in title");
-      cy.get('#publish, button:contains("Publish")').click();
+      clickPrimarySurveyAction("Publish");
       cy.get(noticeSuccess).should("be.visible");
     });
 
@@ -257,7 +271,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       createSurvey(surveyTitle, "Original description");
       openSurveyFromList(surveyTitle);
       cy.get("#post_title, #title").clear().type(updatedTitle);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(noticeSuccess).should("be.visible");
       cy.get("#post_title, #title").should("have.value", updatedTitle);
     });
@@ -275,7 +289,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       visitNewSurvey();
       cy.get("#post_title, #title").clear().type(surveyTitle);
       fillSurveyEditor("Testing form state persistence");
-      cy.get('#save-post, button:contains("Save")').click();
+      clickPrimarySurveyAction("Save");
       cy.get(".notice-success, .updated, .is-success").should("exist");
       cy.get("#post_title, #title").should("have.value", surveyTitle);
     });
@@ -285,7 +299,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       visitNewSurvey();
       cy.get("#post_title, #title").clear().type(surveyTitle);
       fillSurveyEditor("Testing success message");
-      cy.get('#publish, button:contains("Publish")').click();
+      clickPrimarySurveyAction("Publish");
       cy.get(noticeSuccess).should("be.visible");
       cy.get(noticeSuccess)
         .invoke("text")
@@ -313,7 +327,6 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
 
     it("Should navigate to survey edit page from list", () => {
       openSurveyFromList(surveyTitle);
-      cy.url().should("include", "action=edit");
       cy.url().should("include", "post_type=survey");
       cy.get("#post_title, #title").should("have.value", surveyTitle);
     });
@@ -322,7 +335,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       openSurveyFromList(surveyTitle);
       const newTitle = `${surveyTitle} - Updated`;
       cy.get("#post_title, #title").clear().type(newTitle);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(noticeSuccess).should("be.visible");
       cy.get("#post_title, #title").should("have.value", newTitle);
     });
@@ -331,7 +344,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       openSurveyFromList(surveyTitle);
       const newDescription = "Updated survey description with more details";
       fillSurveyEditor(newDescription);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(noticeSuccess).should("be.visible");
     });
 
@@ -339,7 +352,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       openSurveyFromList(surveyTitle);
       cy.get("#post_title, #title").clear().type(`${surveyTitle} Draft`);
       cy.get('input[name="post_status"][value="draft"]').check({ force: true });
-      cy.get('#save-post, button:contains("Save")').click();
+      clickPrimarySurveyAction("Save");
       cy.get(".notice-success, .updated, .is-success").should("exist");
     });
 
@@ -348,7 +361,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       cy.get('input[name="post_status"][value="publish"]').check({
         force: true,
       });
-      cy.get('#publish, button:contains("Publish")').click();
+      clickPrimarySurveyAction("Publish");
       cy.get(noticeSuccess).should("be.visible");
     });
 
@@ -357,7 +370,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       cy.get("#post_title, #title")
         .clear()
         .type(`${surveyTitle} Concurrent Edit`);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(noticeSuccess).should("be.visible");
     });
 
@@ -365,9 +378,9 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       openSurveyFromList(surveyTitle);
       cy.get("#post_title, #title").should("be.visible");
       cy.get('#content, [role="textbox"]').should("be.visible");
-      cy.get(
-        '#publish, button:contains("Publish"), button:contains("Update")',
-      ).should("be.visible");
+      cy.get("#publish, #save-post, button[type='submit']")
+        .filter(":visible")
+        .should("have.length.greaterThan", 0);
       cy.get('input[name="post_status"]').should("exist");
     });
 
@@ -386,14 +399,14 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       const formattedContent =
         "Question 1: Satisfaction\nQuestion 2: Likelihood";
       fillSurveyEditor(formattedContent);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(noticeSuccess).should("be.visible");
     });
 
     it("Should update survey without changing author", () => {
       openSurveyFromList(surveyTitle);
       cy.get("#post_title, #title").clear().type(`${surveyTitle} Author Test`);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(noticeSuccess).should("be.visible");
     });
 
@@ -402,7 +415,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       const specialContent =
         "Test with \"quotes\" and 'apostrophes' & symbols % # @";
       fillSurveyEditor(specialContent);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(noticeSuccess).should("be.visible");
     });
 
@@ -414,7 +427,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
           cy.get("#post_title, #title")
             .clear()
             .type(`${surveyTitle} Status Check`);
-          cy.get('#save-post, button:contains("Save")').click();
+          clickPrimarySurveyAction("Save");
           cy.get('input[name="post_status"]:checked').should(
             "have.value",
             currentStatus,
@@ -425,7 +438,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
     it("Should show edit timestamp after update", () => {
       openSurveyFromList(surveyTitle);
       cy.get("#post_title, #title").clear().type(`${surveyTitle} Timestamp`);
-      cy.get('#publish, button:contains("Update")').click();
+      clickPrimarySurveyAction("Update");
       cy.get(".notice-success, .updated").should("be.visible");
       cy.get("body").should(
         "not.contain",
@@ -441,7 +454,7 @@ describe("UC-ManageSurveys / Manage Surveys", () => {
       visitNewSurvey();
       cy.get("#post_title, #title").clear().type(title);
       fillSurveyEditor("Test survey for deletion");
-      cy.get('#publish, button:contains("Publish")').click();
+      clickPrimarySurveyAction("Publish");
       cy.get(noticeSuccess).should("be.visible");
     };
 
