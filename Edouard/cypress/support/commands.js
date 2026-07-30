@@ -104,26 +104,56 @@ Cypress.Commands.add('openSurveyByName', (surveyName) => {
 
 Cypress.Commands.add("loginAsInstructor", () => {
 
-    cy.visit("https://student.michaelkentburns.com/wp-login.php");
+    cy.session("InstructorSession", () => {
 
-    cy.get("#user_login")
-        .should("be.visible")
-        .clear()
-        .type("EdouardK");
+        cy.visit(
+            "https://student.michaelkentburns.com/wp-login.php"
+        );
 
-    cy.get("#user_pass")
-        .should("be.visible")
-        .clear()
-        .type("Kiza2001@");
 
-    cy.get("#wp-submit")
-        .should("be.enabled")
-        .click();
+        cy.get("#user_login", { timeout: 15000 })
+            .should("be.visible")
+            .click()
+            .clear()
+            .type("EdouardK", { delay: 150 })
+            .should("have.value", "EdouardK");
 
-    cy.url({ timeout: 15000 })
+
+        cy.get("#user_pass")
+            .should("be.visible")
+            .click()
+            .clear()
+            .type("Kiza2001@", { delay: 150 })
+            .should("have.value", "Kiza2001@");
+
+
+        cy.get("#wp-submit")
+            .should("be.enabled")
+            .click();
+
+
+        cy.url({ timeout: 30000 })
+            .should("include", "/wp-admin/");
+
+
+        cy.contains("Dashboard")
+            .should("be.visible");
+
+    });
+
+
+    // Après restauration de session
+    cy.visit(
+        "https://student.michaelkentburns.com/wp-admin/"
+    );
+
+
+    cy.url()
         .should("include", "/wp-admin/");
 
-    cy.contains("Dashboard").should("be.visible");
+
+    cy.contains("Dashboard")
+        .should("be.visible");
 
 });
 
@@ -155,5 +185,125 @@ Cypress.Commands.add("openCreateSurvey", () => {
 
     cy.contains("Add New Survey")
         .should("be.visible");
+
+});
+
+// ======================================================
+// OPEN SURVEY MANAGEMENT
+// ======================================================
+
+Cypress.Commands.add("openSurveyManagement", () => {
+
+    cy.visit("https://student.michaelkentburns.com/wp-admin/edit.php?post_type=survey");
+
+    cy.contains("Surveys")
+        .should("be.visible");
+
+});
+
+
+
+// ======================================================
+// OPEN QUESTIONS PAGE
+// ======================================================
+
+Cypress.Commands.add("openQuestionManagement", () => {
+
+    cy.contains("Questions")
+        .should("be.visible")
+        .click();
+
+
+    cy.url()
+        .should("include","post_type=question");
+
+});
+
+
+
+
+// ======================================================
+// OPEN CREATE QUESTION PAGE
+// ======================================================
+
+Cypress.Commands.add("openCreateQuestion", () => {
+
+
+    cy.contains("Add New Question")
+        .should("be.visible")
+        .click();
+
+
+    cy.contains("Add New Question")
+        .should("be.visible");
+
+
+});
+
+
+// ======================================================
+// SELECT SURVEY IN QUESTION FORM
+// ======================================================
+
+Cypress.Commands.add("selectSurvey", (surveyName) => {
+
+    cy.contains("Associated Survey")
+        .parent()
+        .click();
+
+
+    function searchSurvey() {
+
+        cy.get("body").then(($body) => {
+
+
+            if ($body.text().includes(surveyName)) {
+
+
+                cy.contains(surveyName)
+                    .scrollIntoView()
+                    .click();
+
+
+            } else {
+
+
+                // Scroll inside dropdown/list
+                cy.contains("Associated Survey")
+                    .parent()
+                    .scrollTo("bottom");
+
+
+                cy.wait(1000);
+
+
+                searchSurvey();
+
+            }
+
+
+        });
+
+    }
+
+
+    searchSurvey();
+
+});
+
+
+// ======================================================
+// SELECT QUESTION TYPE
+// ======================================================
+
+Cypress.Commands.add("selectQuestionType", (questionType) => {
+
+    cy.contains("Question Type")
+        .parent()
+        .click();
+
+    cy.contains(questionType)
+        .scrollIntoView()
+        .click();
 
 });
