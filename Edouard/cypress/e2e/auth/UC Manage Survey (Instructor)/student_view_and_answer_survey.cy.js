@@ -1,18 +1,21 @@
 describe("Student - View And Answer Survey Questions", () => {
 
 
+    // ======================================================
+    // IGNORE WORDPRESS JSON EXCEPTION
+    // ======================================================
+
     before(() => {
 
-        // Ignore WordPress JSON REST API errors
         Cypress.on(
             "uncaught:exception",
             (err) => {
 
-                if(
+                if (
                     err.message.includes(
                         "The response is not a valid JSON response"
                     )
-                ){
+                ) {
                     return false;
                 }
 
@@ -23,13 +26,13 @@ describe("Student - View And Answer Survey Questions", () => {
 
 
 
+    // ======================================================
+    // COMMON SETUP
+    // ======================================================
+
     beforeEach(() => {
 
-
-        // Student login
-
         cy.loginAsStudent();
-
 
     });
 
@@ -38,7 +41,6 @@ describe("Student - View And Answer Survey Questions", () => {
     // ======================================================
     // TEST DATA
     // ======================================================
-
 
     const SURVEY_URL =
     "https://student.michaelkentburns.com/survey/participant-program-expectations-survey-edo/";
@@ -52,19 +54,20 @@ describe("Student - View And Answer Survey Questions", () => {
     // Student login
     // ======================================================
 
-
-    it("MQ-020 - Student should login successfully", () => {
-
-
-        cy.url()
-            .should(
-                "not.include",
-                "wp-login.php"
-            );
+    it(
+        "MQ-020 - Student should login successfully",
+        () => {
 
 
-    });
+            cy.url()
+                .should(
+                    "not.include",
+                    "wp-login.php"
+                );
 
+
+        }
+    );
 
 
 
@@ -73,27 +76,28 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-021
-    // Open All Surveys page
+    // Open survey
     // ======================================================
 
-
-    it("MQ-021 - Student should open All Surveys page", () => {
-
-
-        cy.contains("All Surveys")
-            .should("be.visible")
-            .click();
+    it(
+        "MQ-021 - Student should open survey",
+        () => {
 
 
-        cy.url()
-            .should(
-                "include",
-                "/survey"
+            cy.visit(
+                SURVEY_URL
             );
 
 
-    });
+            cy.url()
+                .should(
+                    "include",
+                    "participant-program-expectations-survey-edo"
+                );
 
+
+        }
+    );
 
 
 
@@ -102,20 +106,67 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-022
-    // Find created survey
+    // Display all questions
     // ======================================================
 
-
-    it("MQ-022 - Student should find created survey", () => {
-
-
-        cy.contains(
-            "Participant Program Expectations Survey"
-        )
-        .should("be.visible");
+    it(
+        "MQ-022 - Survey should display all 12 questions",
+        () => {
 
 
-    });
+            cy.visit(
+                SURVEY_URL
+            );
+
+
+            const questions = [
+
+                "Enter your email address",
+
+                "Enter your phone number",
+
+                "List your preferred technologies",
+
+                "Choose your learning preference",
+
+                "Select your birth date",
+
+                "How many years of experience do you have?",
+
+                "Upload your document",
+
+                "Select your preferred tools",
+
+                "Choose your preferred meeting time",
+
+                "Rate your confidence level",
+
+                "Which skill do you want to improve during this program?",
+
+                "Do you already have programming experience?"
+
+            ];
+
+
+
+            questions.forEach(
+                (question)=>{
+
+
+                    cy.contains(
+                        question
+                    )
+                    .should(
+                        "be.visible"
+                    );
+
+
+                }
+            );
+
+
+        }
+    );
 
 
 
@@ -125,27 +176,32 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-023
-    // Open survey
+    // Email question
     // ======================================================
 
-
-    it("MQ-023 - Student should open survey", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-023 - Student should fill email question",
+        () => {
 
 
-        cy.url()
-            .should(
-                "include",
-                "participant-program-expectations-survey-edo"
+            cy.visit(
+                SURVEY_URL
             );
 
 
-    });
+            cy.get(
+                "input[type='email']"
+            )
+            .should(
+                "exist"
+            )
+            .type(
+                "student@test.com"
+            );
 
+
+        }
+    );
 
 
 
@@ -155,40 +211,32 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-024
-    // Display questions
+    // Phone question
     // ======================================================
 
-
-    it("MQ-024 - Survey should display all questions", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-024 - Student should fill phone question",
+        () => {
 
 
-        cy.contains(
-            "What are your main expectations from this program?"
-        )
-        .should("exist");
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-
-        cy.contains(
-            "Which skill do you want to improve during this program?"
-        )
-        .should("exist");
-
-
-
-        cy.contains(
-            "Do you already have programming experience?"
-        )
-        .should("exist");
+            cy.get(
+                "input[type='tel']"
+            )
+            .should(
+                "exist"
+            )
+            .type(
+                "0999999999"
+            );
 
 
-    });
-
+        }
+    );
 
 
 
@@ -198,42 +246,12 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-025
-    // Text question
+    // Text Array question
     // ======================================================
 
-
-    it("MQ-025 - Student should answer Text question", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
-
-
-        cy.get("textarea")
-            .first()
-            .should("exist")
-            .type(
-                "I want to improve my programming and data analysis skills."
-            );
-
-
-    });
-
-
-
-
-
-
-
-
-    // ======================================================
-    // MQ-026
-    // Multiple Choice
-    // ======================================================
-
-
-    it("MQ-026 - Student should answer Multiple Choice question", () => {
+it(
+    "MQ-025 - Student should answer Text Array question",
+    () => {
 
 
         cy.visit(
@@ -242,14 +260,61 @@ describe("Student - View And Answer Survey Questions", () => {
 
 
         cy.contains(
-            "Frontend Development"
+            "List your preferred technologies"
         )
-        .should("exist")
-        .click();
+        .should(
+            "be.visible"
+        );
 
 
-    });
+        cy.get(
+            "textarea"
+        )
+        .should(
+            "exist"
+        )
+        .first()
+        .type(
+`HTML
+CSS
+JavaScript`
+        );
 
+
+    }
+);
+
+
+
+
+    // ======================================================
+    // MQ-026
+    // Radio Button question
+    // ======================================================
+
+    it(
+        "MQ-026 - Student should answer Radio Button question",
+        () => {
+
+
+            cy.visit(
+                SURVEY_URL
+            );
+
+
+            cy.contains(
+                "Online training"
+            )
+            .should(
+                "be.visible"
+            )
+            .click({
+                force:true
+            });
+
+
+        }
+    );
 
 
 
@@ -259,27 +324,29 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-027
-    // True False
+    // Date question
     // ======================================================
 
-
-    it("MQ-027 - Student should answer True False question", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-027 - Student should see Date field",
+        () => {
 
 
-        cy.contains(
-            "Yes"
-        )
-        .should("exist")
-        .click();
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.get(
+                "input[type='date'], input[type='text']"
+            )
+            .should(
+                "exist"
+            );
 
+
+        }
+    );
 
 
 
@@ -289,29 +356,32 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-028
-    // Email
+    // Number question
     // ======================================================
 
-
-    it("MQ-028 - Student should fill email", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-028 - Student should fill Number question",
+        () => {
 
 
-        cy.get(
-            "input[type='email']"
-        )
-        .should("exist")
-        .type(
-            "student@test.com"
-        );
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.get(
+                "input[type='number']"
+            )
+            .should(
+                "exist"
+            )
+            .type(
+                "3"
+            );
 
+
+        }
+    );
 
 
 
@@ -321,29 +391,29 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-029
-    // Phone
+    // File upload
     // ======================================================
 
-
-    it("MQ-029 - Student should fill phone", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-029 - Student should see File Upload field",
+        () => {
 
 
-        cy.get(
-            "input[type='tel']"
-        )
-        .should("exist")
-        .type(
-            "0999999999"
-        );
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.get(
+                "input[type='file']"
+            )
+            .should(
+                "exist"
+            );
 
+
+        }
+    );
 
 
 
@@ -353,29 +423,32 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-030
-    // Number
+    // Checkbox question
     // ======================================================
 
-
-    it("MQ-030 - Student should fill number", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-030 - Student should select Checkbox option",
+        () => {
 
 
-        cy.get(
-            "input[type='number']"
-        )
-        .should("exist")
-        .type(
-            "3"
-        );
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.contains(
+                "HTML"
+            )
+            .should(
+                "be.visible"
+            )
+            .click({
+                force:true
+            });
 
+
+        }
+    );
 
 
 
@@ -385,26 +458,32 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-031
-    // Date
+    // Time question
     // ======================================================
 
-
-    it("MQ-031 - Student should see Date field", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-031 - Student should fill Time question",
+        () => {
 
 
-        cy.get(
-            "input[type='date']"
-        )
-        .should("exist");
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.get(
+                "input[type='time']"
+            )
+            .should(
+                "exist"
+            )
+            .type(
+                "10:30"
+            );
 
+
+        }
+    );
 
 
 
@@ -414,26 +493,36 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-032
-    // File upload
+    // Range question
     // ======================================================
 
-
-    it("MQ-032 - Student should see File Upload field", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-032 - Student should interact with Range question",
+        () => {
 
 
-        cy.get(
-            "input[type='file']"
-        )
-        .should("exist");
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.get(
+                "input[type='range']"
+            )
+            .should(
+                "exist"
+            )
+            .invoke(
+                "val",
+                5
+            )
+            .trigger(
+                "change"
+            );
 
+
+        }
+    );
 
 
 
@@ -443,30 +532,32 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-033
-    // Checkbox
+    // Multiple Choice question
     // ======================================================
 
-
-    it("MQ-033 - Student should select checkbox", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-033 - Student should answer Multiple Choice question",
+        () => {
 
 
-        cy.get(
-            "input[type='checkbox']"
-        )
-        .first()
-        .should("exist")
-        .check({
-            force:true
-        });
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.contains(
+                "Frontend Development"
+            )
+            .should(
+                "be.visible"
+            )
+            .click({
+                force:true
+            });
 
+
+        }
+    );
 
 
 
@@ -476,29 +567,32 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-034
-    // Time
+    // True False question
     // ======================================================
 
-
-    it("MQ-034 - Student should fill time", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-034 - Student should answer True False question",
+        () => {
 
 
-        cy.get(
-            "input[type='time']"
-        )
-        .should("exist")
-        .type(
-            "10:30"
-        );
+            cy.visit(
+                SURVEY_URL
+            );
 
 
-    });
+            cy.contains(
+                "True"
+            )
+            .should(
+                "be.visible"
+            )
+            .click({
+                force:true
+            });
 
+
+        }
+    );
 
 
 
@@ -508,62 +602,145 @@ describe("Student - View And Answer Survey Questions", () => {
 
     // ======================================================
     // MQ-035
-    // Range
+    // Submit button exists
     // ======================================================
 
-
-    it("MQ-035 - Student should interact with range", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
+    it(
+        "MQ-035 - Submit button should exist without submitting",
+        () => {
 
 
-        cy.get(
-            "input[type='range']"
-        )
+            cy.visit(
+                SURVEY_URL
+            );
+
+
+            cy.get(
+                "input[type='submit'], button[type='submit']"
+            )
+            .should(
+                "exist"
+            );
+
+
+        }
+    );
+
+
+
+    // ======================================================
+// MQ-036
+// COMPLETE SURVEY WITHOUT SUBMIT
+// ======================================================
+
+it("MQ-036 - Student should answer all survey questions without submitting", () => {
+
+
+    cy.visit(SURVEY_URL);
+
+
+
+    // Question 1 - Email
+    cy.get("input[type='email']")
         .should("exist")
-        .invoke(
-            "val",
-            5
-        )
-        .trigger(
-            "change"
+        .type("student@test.com");
+
+
+
+    // Question 2 - Phone
+    cy.get("input[type='tel']")
+        .should("exist")
+        .type("0999999999");
+
+
+
+    // Question 3 - Text Array
+    cy.get("textarea")
+        .should("exist")
+        .first()
+        .type(
+`JavaScript
+Python
+React`
         );
 
 
-    });
+
+    // Question 4 - Radio Button
+    cy.contains(
+        "Online training"
+    )
+    .should("exist")
+    .click();
 
 
 
+    // Question 5 - Date
+    cy.get("input[type='date']")
+        .should("exist")
+        .type("2000-01-15");
 
 
 
+    // Question 6 - Number
+    cy.get("input[type='number']")
+        .should("exist")
+        .type("3");
 
 
-    // ======================================================
-    // MQ-036
-    // Submit button exists but no submit
-    // ======================================================
 
-
-    it("MQ-036 - Submit button should exist without submitting", () => {
-
-
-        cy.visit(
-            SURVEY_URL
-        );
-
-
-        cy.get(
-            "input[type='submit'], button[type='submit']"
-        )
+    // Question 7 - File Upload
+    cy.get("input[type='file']")
         .should("exist");
 
 
-    });
+
+    // Question 8 - Checkbox
+    cy.contains("HTML")
+        .should("exist")
+        .click();
 
 
 
+    // Question 9 - Time
+    cy.get("input[type='time']")
+        .should("exist")
+        .type("10:30");
+
+
+
+    // Question 10 - Range
+    cy.get("input[type='range']")
+        .should("exist")
+        .invoke("val", 5)
+        .trigger("change");
+
+
+
+    // Question 11 - Multiple Choice
+    cy.contains(
+        "Frontend Development"
+    )
+    .should("exist")
+    .click();
+
+
+
+    // Question 12 - True False
+    cy.contains(
+        "True"
+    )
+    .should("exist")
+    .click();
+
+
+
+    // Verify submit exists but do not submit
+    cy.get(
+        "input[type='submit'], button[type='submit']"
+    )
+    .should("exist");
+
+
+});
 });
