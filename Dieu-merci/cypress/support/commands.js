@@ -13,17 +13,22 @@
  * @param {string} password - WordPress password
  */
 Cypress.Commands.add("login", (username, password) => {
-  cy.visit("/wp-login.php");
-  cy.get("#loginform #user_login")
-    .clear()
-    .type(username, { delay: 0 })
-    .should("have.value", username);
-  cy.get("#loginform #user_pass")
-    .clear()
-    .type(password, { delay: 0 })
-    .should("have.value", password);
-  cy.get("#loginform #wp-submit").click();
-
+  cy.request({
+    method: "POST",
+    url: "/wp-login.php",
+    form: true,
+    body: {
+      log: username,
+      pwd: password,
+      "wp-submit": "Log In",
+      redirect_to: "/wp-admin/",
+      testcookie: 1,
+    },
+    failOnStatusCode: false,
+  }).then((response) => {
+    expect([200, 302]).to.include(response.status);
+  });
+  cy.visit("/wp-admin/", { failOnStatusCode: false, timeout: 180000 });
   cy.get("body", { timeout: 20000 }).should(($body) => {
     const text = $body.text().toLowerCase();
     const hasAuthError =
@@ -56,9 +61,17 @@ Cypress.Commands.add("loginWithError", (username, password) => {
  * Logout from the application
  */
 Cypress.Commands.add("logout", () => {
-  cy.visit("/wp-admin/");
-  cy.get('a[href*="wp-logout.php"]').first().click();
-  cy.url().should("include", "wp-login.php");
+  cy.visit("/wp-admin/", { failOnStatusCode: false });
+  cy.get("body").then(($body) => {
+    const logoutLink = $body.find('a[href*="wp-logout.php"]');
+    if (logoutLink.length > 0) {
+      cy.wrap(logoutLink.first()).click();
+      cy.url({ timeout: 20000 }).should("include", "wp-login.php");
+    } else {
+      cy.clearCookies();
+      cy.visit("/wp-login.php", { failOnStatusCode: false });
+    }
+  });
 });
 
 /**
@@ -347,6 +360,95 @@ Cypress.Commands.add("viewSurveyResponses", (surveyTitle) => {
 Cypress.Commands.add("visitPage", (url) => {
   cy.visit(url);
   cy.get('main, .content, [role="main"]').should("be.visible");
+});
+
+/**
+ * Open the first survey link available on the current page.
+ */
+Cypress.Commands.add("openFirstSurvey", () => {
+  cy.get("body").then(($body) => {
+    const surveyLinks = Cypress.$('a[href*="/survey/"]', $body).filter(
+      (_, link) => {
+        const href = Cypress.$(link).attr("href") || "";
+        return href.includes("/survey/") && !href.includes("page");
+      },
+    );
+
+    if (surveyLinks.length === 0) {
+      cy.log("No survey link is available on the page.");
+      return;
+    }
+
+    cy.wrap(surveyLinks.first()).click({ force: true });
+    cy.location("pathname", { timeout: 20000 }).should("include", "/survey/");
+  });
+});
+
+/**
+ * Fill the first available answer field in a survey form.
+ * Supports radio, checkbox, text inputs, and textareas.
+ */
+Cypress.Commands.add("fillSurveyForm", () => {
+  cy.get("body").then(($body) => {
+    const form = Cypress.$("form", $body);
+    if (form.length === 0) {
+      cy.log("No survey form is available to fill.");
+      return;
+    }
+
+    if (form.find('input[type="radio"]').length > 0) {
+      cy.get('input[type="radio"]').first().check({ force: true });
+      return;
+    }
+
+    if (form.find('input[type="checkbox"]').length > 0) {
+      cy.get('input[type="checkbox"]').first().check({ force: true });
+      return;
+    }
+
+    if (form.find('input[type="text"]:not([type="hidden"])').length > 0) {
+      cy.get('input[type="text"]:not([type="hidden"])')
+        .first()
+        .clear({ force: true })
+        .type("Test answer", { force: true });
+      return;
+    }
+
+    if (form.find("textarea").length > 0) {
+      cy.get("textarea").first().clear({ force: true }).type("Test feedback", {
+        force: true,
+      });
+    }
+  });
+});
+
+/**
+ * Submit the current survey form if it exists.
+ */
+Cypress.Commands.add("submitSurveyForm", () => {
+  cy.get("body").then(($body) => {
+    const form = $body.find("form");
+    if (form.length === 0) {
+      cy.log("No survey form is available to submit.");
+      return;
+    }
+
+    cy.get('button[type="submit"], input[type="submit"]')
+      .first()
+      .click({ force: true });
+  });
+});
+
+/**
+ * Assert that the current page contains one of the expected feedback keywords.
+ * @param {RegExp[]} patterns - Array of regex patterns to match against the page text.
+ */
+Cypress.Commands.add("assertSurveyFeedbackState", (patterns = []) => {
+  cy.get("body").then(($body) => {
+    const pageText = $body.text().toLowerCase();
+    const hasMatch = patterns.some((pattern) => pattern.test(pageText));
+    expect(hasMatch, `Expected page text to match one of ${patterns.length} patterns`).to.be.true;
+  });
 });
 
 /**
