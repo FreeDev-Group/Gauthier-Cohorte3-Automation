@@ -1,160 +1,330 @@
-# Student Survey App – Automated E2E Testing (Cohort 3)
+# Student Survey App – Automated End-to-End (E2E) Testing
 
-This repository contains the automated end-to-end (E2E) testing suite for the **Student Survey Application**, built using Cypress.
+This repository contains the automated End-to-End (E2E) test suite for the **Student Survey Application**, developed using **Cypress**.
 
-The objective of this project is to ensure application stability through automated testing while simulating a real QA environment where each team member independently implements test cases following a shared structure and standards.
+The project was created as a collaborative QA automation exercise where each team member independently implements automated tests based on the same functional requirements.
 
----
-
-# 📌 Project Overview
-
-   - **Testing Framework:** Cypress  
-   - **Test Type:** End-to-End (E2E)  
-   - **Application Under Test:** Student Survey App  
-   - **Testing Strategy:** Independent implementation per team member  
+The objective is to improve automation testing skills while following a professional workflow similar to a real software testing team.
 
 ---
 
-# 👥 Team Organization
+# Project Overview
 
-   - **Mentor / Reviewer:** Gautier  
-   - **Team Members:** Edouard, Arnold, Dieu-merci  
+### Application Under Test
 
-Each member has a dedicated workspace where they implement automated test cases independently, based on the same functional use cases.
+Student Survey Application
+
+### Testing Framework
+
+Cypress
+
+### Test Type
+
+End-to-End (E2E)
+
+### Programming Language
+
+JavaScript
+
+### Goal
+
+Validate the main features of the Student Survey Application through automated testing while maintaining independent implementations for each contributor.
 
 ---
 
-# 📂 Project Structure
+# Team
 
-   Doc/
-   
-     use-cases/
-     UC-Login.md
-     UC-CreateAccount.md
-     UC-ProvideFeedback.md
-     UC-ManageSurveys.md
-     UC-ReviewFeedback.md
-     users/
-     
-        student.md
-        instructor.md
-        administrator.md
+| Role              | Name       |
+| ----------------- | ---------- |
+| Mentor / Reviewer | Gautier    |
+| QA Engineer       | Arnold     |
+| QA Engineer       | Edouard    |
+| QA Engineer       | Dieu-merci |
 
-   Edouard/
-   
-     UC-Login/
-     UC-CreateAccount/
-     UC-ProvideFeedback/
-     UC-ManageSurveys/
-     UC-ReviewFeedback/
-     test-reports/
+Each team member writes and maintains their own Cypress tests. Although everyone tests the same use cases, each implementation is independent.
 
-   Arnold/
-   
-     UC-Login/
-     UC-CreateAccount/
-     UC-ProvideFeedback/
-     UC-ManageSurveys/
-     UC-ReviewFeedback/
-     test-reports/
+---
 
-   Dieu-merci/
-   
-     UC-Login/
-     UC-CreateAccount/
-     UC-ProvideFeedback/
-     UC-ManageSurveys/
-     UC-ReviewFeedback/
-     test-reports/
+# Completed Use Cases
 
-    cypress/
-    fixtures/
-    support/
-    downloads/
+The following use cases have been completed and validated.
+
+* ✅ UC-Register
+* ✅ UC-Login
+* ✅ UC-Provide Feedback
+* ✅ UC-Review Past Feedback
+
+Each use case is implemented separately by every contributor.
+
+---
+
+# Project Structure
+
+```
+Doc/
+│
+├── use-cases/
+│   ├── UC-Login.md
+│   ├── UC-CreateAccount.md
+│   ├── UC-ProvideFeedback.md
+│   ├── UC-ManageSurveys.md
+│   └── UC-ReviewFeedback.md
+│
+└── users/
+    ├── student.md
+    ├── instructor.md
+    └── administrator.md
+
+Arnold/
+│
+├── UC-Login/
+├── UC-CreateAccount/
+├── UC-ProvideFeedback/
+├── UC-ManageSurveys/
+├── UC-ReviewFeedback/
+└── test-reports/
+
+Edouard/
+│
+├── UC-Login/
+├── UC-CreateAccount/
+├── UC-ProvideFeedback/
+├── UC-ManageSurveys/
+├── UC-ReviewFeedback/
+└── test-reports/
+
+Dieu-merci/
+│
+├── UC-Login/
+├── UC-CreateAccount/
+├── UC-ProvideFeedback/
+├── UC-ManageSurveys/
+├── UC-ReviewFeedback/
+└── test-reports/
+
+cypress/
+├── fixtures/
+├── support/
+└── downloads/
 
 cypress.config.js
 package.json
 README.md
 .gitignore
+```
 
 ---
 
-# 📘 Documentation (Doc Folder)
+# Installation Guide
 
-The `Doc/` folder is the **single source of truth** for all functional requirements.
+## 1. Clone the repository
 
-## use-cases/
-Contains all detailed system use cases:
-- Functional flows  
-- Preconditions  
-- Expected system behavior  
-- Alternative scenarios  
+```bash
+git clone <repository-url>
+```
 
-## users/
-Defines system actors and their roles:
-- Student  
-- Instructor  
-- Administrator  
+Enter the project folder.
 
-This file describes permissions, responsibilities, and access scope for each role.
+```bash
+cd Student-Survey-App
+```
 
 ---
 
-# 🎯 Objectives
+## 2. Install Node.js
 
-- Ensure application stability through automated E2E testing  
-- Simulate real QA workflows in a structured environment  
-- Improve individual automation and testing skills  
-- Enable comparison of different implementations for the same use cases  
-- Maintain strict separation of contributor workspaces  
+Download and install the latest LTS version of Node.js.
 
----
+After installation, verify that Node.js and npm are available.
 
-# ⚙️ Testing Approach
+```bash
+node -v
+```
 
-- Each member works independently  
-- Same use cases, different implementations  
-- All tests strictly reference `Doc/use-cases/`  
-- No shared test logic between contributors  
-- Each member is fully responsible for their own test coverage  
+```bash
+npm -v
+```
 
 ---
 
-# 📊 Test Reports
+## 3. Install project dependencies
 
-Each contributor must provide test reports inside their own directory:
+Run the following command.
 
-### Each report must include:
-- Tested scenarios  
-- Execution results  
-- Bugs or anomalies identified  
-- Recommendations or improvements  
+```bash
+npm install
+```
 
----
-
-# 🌿 Branch Strategy
-
-- `main` → Stable and validated version  
-- `develop` → Active development branch  
-
-All tested and approved code must be merged into `main` via review.
+This installs every package required by the project, including Cypress.
 
 ---
 
-# 🚀 Project Goal
+## 4. Install Cypress (Optional)
 
-This repository is designed to develop:
+If Cypress is not installed automatically, run:
 
-- Strong QA automation skills  
-- Real-world testing discipline  
-- Structured team collaboration  
-- Consistent test design methodology  
-- Independent yet comparable implementations  
+```bash
+npm install cypress --save-dev
+```
+
+Verify the installation.
+
+```bash
+npx cypress -v
+```
+
+Example:
+
+```
+Cypress package version: 15.x.x
+Cypress binary version: 15.x.x
+```
 
 ---
 
-# 📌 Key Principle
+# Running Cypress
 
-Each contributor owns their implementation completely.  
-Evaluation is based on comparison of approaches, not shared code.
+## Open Cypress Test Runner
 
+```bash
+npx cypress open
+```
+
+or
+
+```bash
+npx cypress open
+```
+
+The Cypress interface will open, allowing you to execute tests interactively.
+
+---
+
+## Run tests in headless mode
+
+```bash
+npx cypress run
+```
+
+To use Chrome:
+
+```bash
+npx cypress run --browser chrome
+```
+
+---
+
+# Test Organization
+
+Each contributor maintains an independent workspace.
+
+Example:
+
+```
+Arnold/
+    UC-Register/
+    UC-Login/
+    UC-ProvideFeedback/
+    UC-ReviewFeedback/
+
+Edouard/
+    ...
+
+Dieu-merci/
+    ...
+```
+
+No contributor modifies another contributor's implementation.
+
+---
+
+# Documentation
+
+The `Doc` directory contains all project documentation.
+
+It includes:
+
+* Functional requirements
+* Use Cases
+* User roles
+* Expected system behavior
+* Alternative scenarios
+
+Every automated test should follow these documents.
+
+---
+
+# Testing Principles
+
+This project follows the following rules:
+
+* Independent implementation
+* Same functional requirements
+* No shared test logic
+* Clean and readable code
+* Reproducible automated tests
+* Professional project organization
+
+---
+
+# Test Reports
+
+Each contributor stores their reports inside their own `test-reports` folder.
+
+Reports may include:
+
+* Executed scenarios
+* Test results
+* Identified bugs
+* Screenshots
+* Recommendations
+
+---
+
+# Branch Strategy
+
+| Branch  | Description        |
+| ------- | ------------------ |
+| main    | Stable version     |
+| develop | Active development |
+
+Every change should be reviewed before being merged into the `main` branch.
+
+---
+
+# Project Objectives
+
+This project helps contributors develop practical experience in:
+
+* QA Automation
+* Cypress
+* End-to-End Testing
+* Software Quality Assurance
+* Team Collaboration
+* Git and GitHub
+* Professional Testing Practices
+
+---
+
+# Technologies Used
+
+* Cypress
+* JavaScript
+* Node.js
+* Git
+* GitHub
+
+---
+
+# Contributors
+
+* Gautier (Mentor)
+* Arnold
+* Edouard
+* Dieu-merci
+
+---
+
+# License
+
+This repository is intended for educational purposes and QA automation practice.
