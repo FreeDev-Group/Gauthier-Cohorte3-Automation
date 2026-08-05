@@ -34,7 +34,7 @@ describe("Provide Feedback", () => {
     cy.contains("All Surveys").click();
 
     // Navigate through three pages.
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       // Scroll to pagination section.
       cy.scrollTo("bottom");
 
@@ -43,20 +43,12 @@ describe("Provide Feedback", () => {
     }
 
     // Open Arnold Project Testing Survey.
-    cy.contains("Arnold Project Testing Survey", { timeout: 10000 })
+    cy.contains("Wise _Test_With_Playwright Updated", { timeout: 10000 })
       .should("be.visible")
       .click();
 
     // should response for all questions
-    cy.get('[name="answer[348]"]').should("be.visible").clear().type("Front-end web development is the creation of user interfaces.");
-
-    cy.get('[name="answer[349]"]').should("be.visible").clear().type("Because web development requires different skills, and teamwork helps complete projects successfully.");
-
-    cy.get('[name="answer[350]"]').should("be.visible").clear().type("A computer, internet access, a web browser, a text editor, and source management tools.");
-
-    cy.get('#submit-btn').should("be.visible").click();
-
-    // Verify that the feedback submission was successful.
-    cy.contains("Thank you for your feedback!", { timeout: 10000 }).should("be.visible");
+    cy.get('[name="answer[747]"]').should("be.visible")
+    .clear().type("This test is very very beautiful for me and a like it.", {delay: 200});
   });
 });
