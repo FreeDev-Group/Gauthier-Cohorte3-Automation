@@ -1,160 +1,97 @@
-# Student Survey App – Automated E2E Testing (Cohort 3)
+# Student Survey Application – Automated E2E Testing Report
 
-This repository contains the automated end-to-end (E2E) testing suite for the **Student Survey Application**, built using Cypress.
+This repository documents the implementation of automated end-to-end (E2E) tests for the Student Survey Application using Cypress. The objective of this work is to validate the main functional flows of the application from a user perspective and to provide a structured, maintainable testing framework for future execution and reporting.
 
-The objective of this project is to ensure application stability through automated testing while simulating a real QA environment where each team member independently implements test cases following a shared structure and standards.
+## 1. Project Objective
 
----
+The project aims to verify the reliability and correctness of core business workflows by automating critical user interactions. These automated tests simulate real user behavior and help ensure that the application remains functional as the system evolves.
 
-# 📌 Project Overview
+## 2. Scope of the Testing Work
 
-   - **Testing Framework:** Cypress  
-   - **Test Type:** End-to-End (E2E)  
-   - **Application Under Test:** Student Survey App  
-   - **Testing Strategy:** Independent implementation per team member  
+The test suite covers the following functional use cases:
 
----
+- User authentication
+- Account creation
+- Survey submission and feedback entry
+- Survey management operations
+- Review of completed feedback
 
-# 👥 Team Organization
+## 3. Testing Tools and Environment
 
-   - **Mentor / Reviewer:** Gautier  
-   - **Team Members:** Edouard, Arnold, Dieu-merci  
+- Framework: Cypress
+- Test Type: End-to-End (E2E)
+- Application Under Test: Student Survey Application
+- Test Approach: Scenario-based validation aligned with business use cases
 
-Each member has a dedicated workspace where they implement automated test cases independently, based on the same functional use cases.
+## 4. Installation and Execution
 
----
+### Prerequisites
 
-# 📂 Project Structure
+The following tools are required:
 
-   Doc/
-   
-     use-cases/
-     UC-Login.md
-     UC-CreateAccount.md
-     UC-ProvideFeedback.md
-     UC-ManageSurveys.md
-     UC-ReviewFeedback.md
-     users/
-     
-        student.md
-        instructor.md
-        administrator.md
+- Node.js
+- npm
 
-   Edouard/
-   
-     UC-Login/
-     UC-CreateAccount/
-     UC-ProvideFeedback/
-     UC-ManageSurveys/
-     UC-ReviewFeedback/
-     test-reports/
+### Installation
 
-   Arnold/
-   
-     UC-Login/
-     UC-CreateAccount/
-     UC-ProvideFeedback/
-     UC-ManageSurveys/
-     UC-ReviewFeedback/
-     test-reports/
+Run the following command from the project root:
 
-   Dieu-merci/
-   
-     UC-Login/
-     UC-CreateAccount/
-     UC-ProvideFeedback/
-     UC-ManageSurveys/
-     UC-ReviewFeedback/
-     test-reports/
+```bash
+npm install
+```
 
-    cypress/
-    fixtures/
-    support/
-    downloads/
+### Launch the Cypress Test Runner
 
-cypress.config.js
-package.json
-README.md
-.gitignore
+```bash
+npx cypress open
+```
 
----
+### Execute Tests from the Terminal
 
-# 📘 Documentation (Doc Folder)
+To run a specific test suite:
 
-The `Doc/` folder is the **single source of truth** for all functional requirements.
+```bash
+npx cypress run --spec cypress/e2e/UC-Login/login.cy.js --browser electron
+```
 
-## use-cases/
-Contains all detailed system use cases:
-- Functional flows  
-- Preconditions  
-- Expected system behavior  
-- Alternative scenarios  
+To run the full test suite:
 
-## users/
-Defines system actors and their roles:
-- Student  
-- Instructor  
-- Administrator  
+```bash
+npx cypress run --browser electron
+```
 
-This file describes permissions, responsibilities, and access scope for each role.
+### Environment Configuration
 
----
+Some tests may require environment variables such as:
 
-# 🎯 Objectives
+- WORDPRESS_STUDENT_USER
+- WORDPRESS_STUDENT_PASSWORD
 
-- Ensure application stability through automated E2E testing  
-- Simulate real QA workflows in a structured environment  
-- Improve individual automation and testing skills  
-- Enable comparison of different implementations for the same use cases  
-- Maintain strict separation of contributor workspaces  
+These values should be configured before execution, depending on the target environment.
 
----
+## 5. Repository Structure
 
-# ⚙️ Testing Approach
+The project is organized by use case to keep the testing documentation clear and maintainable.
 
-- Each member works independently  
-- Same use cases, different implementations  
-- All tests strictly reference `Doc/use-cases/`  
-- No shared test logic between contributors  
-- Each member is fully responsible for their own test coverage  
+- [cypress/e2e/UC-Login](cypress/e2e/UC-Login)
+- [cypress/e2e/UC-CreateAccount](cypress/e2e/UC-CreateAccount)
+- [cypress/e2e/UC-ProvideFeedback](cypress/e2e/UC-ProvideFeedback)
+- [cypress/e2e/UC-ManageSurveys](cypress/e2e/UC-ManageSurveys)
+- [cypress/e2e/UC-ReviewFeedback](cypress/e2e/UC-ReviewFeedback)
 
----
+Each folder contains a dedicated README describing the objective, scope, and execution method of the corresponding test suite.
 
-# 📊 Test Reports
+## 6. Use Case Summary
 
-Each contributor must provide test reports inside their own directory:
+| Use Case | Folder | Purpose |
+| --- | --- | --- |
+| Login | [cypress/e2e/UC-Login](cypress/e2e/UC-Login) | Validates the authentication workflow |
+| Create Account | [cypress/e2e/UC-CreateAccount](cypress/e2e/UC-CreateAccount) | Covers registration and validation scenarios |
+| Provide Feedback | [cypress/e2e/UC-ProvideFeedback](cypress/e2e/UC-ProvideFeedback) | Verifies survey answering and submission |
+| Manage Surveys | [cypress/e2e/UC-ManageSurveys](cypress/e2e/UC-ManageSurveys) | Covers survey creation and management actions |
+| Review Feedback | [cypress/e2e/UC-ReviewFeedback](cypress/e2e/UC-ReviewFeedback) | Validates feedback history and review flows |
 
-### Each report must include:
-- Tested scenarios  
-- Execution results  
-- Bugs or anomalies identified  
-- Recommendations or improvements  
+## 7. Conclusion
 
----
-
-# 🌿 Branch Strategy
-
-- `main` → Stable and validated version  
-- `develop` → Active development branch  
-
-All tested and approved code must be merged into `main` via review.
-
----
-
-# 🚀 Project Goal
-
-This repository is designed to develop:
-
-- Strong QA automation skills  
-- Real-world testing discipline  
-- Structured team collaboration  
-- Consistent test design methodology  
-- Independent yet comparable implementations  
-
----
-
-# 📌 Key Principle
-
-Each contributor owns their implementation completely.  
-Evaluation is based on comparison of approaches, not shared code.
+This documentation provides a professional structure for the Cypress testing work carried out in this project. It is intended to support future maintenance, execution, and evaluation of the automated test suites in a clear and organized manner.
 

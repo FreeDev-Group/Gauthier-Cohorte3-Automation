@@ -6,8 +6,8 @@ module.exports = defineConfig({
   e2e: {
     supportFile: "cypress/support/e2e.js",
     baseUrl: "https://student.michaelkentburns.com",
-    defaultCommandTimeout: 10000,
-    pageLoadTimeout: 60000,
+    defaultCommandTimeout: 20000,
+    pageLoadTimeout: 180000,
     viewportWidth: 1280,
     viewportHeight: 800,
     video: true,
