@@ -6,28 +6,28 @@ The objective of this project is to ensure application stability through automat
 
 ---
 
-# 📌 Project Overview
+## Project Overview
 
-   - **Testing Framework:** Cypress  
-   - **Test Type:** End-to-End (E2E)  
-   - **Application Under Test:** Student Survey App  
-   - **Testing Strategy:** Independent implementation per team member  
+- **Testing Framework:** Cypress  
+- **Test Type:** End-to-End (E2E)  
+- **Application Under Test:** Student Survey App  
+- **Testing Strategy:** Independent implementation per team member  
 
 ---
 
-# 👥 Team Organization
+## Team Organization
 
-   - **Mentor / Reviewer:** Gautier  
-   - **Team Members:** Edouard, Arnold, Dieu-merci  
+- **Mentor / Reviewer:** Gautier  
+- **Team Members:** Edouard, Arnold, Dieu-merci  
 
 Each member has a dedicated workspace where they implement automated test cases independently, based on the same functional use cases.
 
 ---
 
-# 📂 Project Structure
+## Project Structure
 
    Doc/
-   
+
      use-cases/
      UC-Login.md
      UC-CreateAccount.md
@@ -35,13 +35,13 @@ Each member has a dedicated workspace where they implement automated test cases 
      UC-ManageSurveys.md
      UC-ReviewFeedback.md
      users/
-     
+
         student.md
         instructor.md
         administrator.md
 
    Edouard/
-   
+
      UC-Login/
      UC-CreateAccount/
      UC-ProvideFeedback/
@@ -50,7 +50,7 @@ Each member has a dedicated workspace where they implement automated test cases 
      test-reports/
 
    Arnold/
-   
+
      UC-Login/
      UC-CreateAccount/
      UC-ProvideFeedback/
@@ -59,7 +59,7 @@ Each member has a dedicated workspace where they implement automated test cases 
      test-reports/
 
    Dieu-merci/
-   
+
      UC-Login/
      UC-CreateAccount/
      UC-ProvideFeedback/
@@ -79,19 +79,23 @@ README.md
 
 ---
 
-# 📘 Documentation (Doc Folder)
+## Documentation (Doc Folder)
 
 The `Doc/` folder is the **single source of truth** for all functional requirements.
 
 ## use-cases/
+
 Contains all detailed system use cases:
+
 - Functional flows  
 - Preconditions  
 - Expected system behavior  
 - Alternative scenarios  
 
 ## users/
+
 Defines system actors and their roles:
+
 - Student  
 - Instructor  
 - Administrator  
@@ -100,7 +104,7 @@ This file describes permissions, responsibilities, and access scope for each rol
 
 ---
 
-# 🎯 Objectives
+## Objectives
 
 - Ensure application stability through automated E2E testing  
 - Simulate real QA workflows in a structured environment  
@@ -110,7 +114,7 @@ This file describes permissions, responsibilities, and access scope for each rol
 
 ---
 
-# ⚙️ Testing Approach
+## Testing Approach
 
 - Each member works independently  
 - Same use cases, different implementations  
@@ -120,11 +124,12 @@ This file describes permissions, responsibilities, and access scope for each rol
 
 ---
 
-# 📊 Test Reports
+## Test Reports
 
 Each contributor must provide test reports inside their own directory:
 
-### Each report must include:
+### Each report must include
+
 - Tested scenarios  
 - Execution results  
 - Bugs or anomalies identified  
@@ -132,7 +137,7 @@ Each contributor must provide test reports inside their own directory:
 
 ---
 
-# 🌿 Branch Strategy
+## Branch Strategy
 
 - `main` → Stable and validated version  
 - `develop` → Active development branch  
@@ -141,7 +146,7 @@ All tested and approved code must be merged into `main` via review.
 
 ---
 
-# 🚀 Project Goal
+## Project Goal
 
 This repository is designed to develop:
 
@@ -153,8 +158,7 @@ This repository is designed to develop:
 
 ---
 
-# 📌 Key Principle
+## Key Principle
 
 Each contributor owns their implementation completely.  
 Evaluation is based on comparison of approaches, not shared code.
-
